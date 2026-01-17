@@ -130,6 +130,11 @@ const WORD_SCORES: Record<string, SentimentScore & { category?: string }> = {
     委屈: { valence: -0.7, energy: 0.5 },
     感动: { valence: 0.8, energy: 0.6 },
     珍贵: { valence: 0.9, energy: 0.5 },
+    不舒服: { valence: -0.6, energy: 0.3 },
+    难受: { valence: -0.7, energy: 0.3 },
+    舒服: { valence: 0.7, energy: 0.4, category: 'zen' },
+    痛苦: { valence: -0.8, energy: 0.7 }, // High energy pain
+    刺痛: { valence: -0.7, energy: 0.8 },
 
     // Nature / Ambience
     rain: { valence: -0.1, energy: 0.3 },
@@ -157,7 +162,7 @@ const WORD_SCORES: Record<string, SentimentScore & { category?: string }> = {
 // ... analyzeSentiment (Unchanged) ...
 export function analyzeSentiment(text: string): SentimentScore {
     let totalValence = 0;
-    let totalEnergy = 0.5;
+    let totalEnergy = 0; // Fixed: Start at 0 for accurate average
     let count = 0;
     let hasPos = false;
     let hasNeg = false;
@@ -181,7 +186,7 @@ export function analyzeSentiment(text: string): SentimentScore {
             if (s.category) categoryCounts[s.category] = (categoryCounts[s.category] || 0) + 1;
         }
     });
-    if (count === 0) return { valence: 0, energy: 0.5 };
+    if (count === 0) return { valence: 0, energy: 0.5 }; // Default if no words found
     if (text.includes("阳光") || text.includes("Sun")) totalEnergy = Math.max(totalEnergy, 0.6 * count);
 
     let dominantCategory: 'nostalgia' | 'anxiety' | 'celebration' | 'zen' | undefined;
