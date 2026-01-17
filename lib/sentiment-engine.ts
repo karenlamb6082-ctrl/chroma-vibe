@@ -102,6 +102,56 @@ const WORD_SCORES: Record<string, SentimentScore & { category?: string }> = {
     干杯: { valence: 0.9, energy: 0.8, category: 'celebration' },
     节日: { valence: 0.8, energy: 0.7, category: 'celebration' },
     过年: { valence: 0.9, energy: 0.8, category: 'celebration' },
+    // ... Existing words ...
+
+    // Nuanced Emotions / Mixed
+    bittersweet: { valence: 0.1, energy: 0.4, category: 'nostalgia' },
+    yearning: { valence: -0.1, energy: 0.6, category: 'nostalgia' },
+    melancholy: { valence: -0.4, energy: 0.3 },
+    grateful: { valence: 0.8, energy: 0.5 },
+    hope: { valence: 0.7, energy: 0.6 },
+    confused: { valence: -0.2, energy: 0.5 },
+    lost: { valence: -0.5, energy: 0.3 },
+    free: { valence: 0.8, energy: 0.8 },
+
+    // Chinese Expansion - Nuanced
+    迷茫: { valence: -0.3, energy: 0.4 },
+    释怀: { valence: 0.6, energy: 0.4, category: 'zen' },
+    期待: { valence: 0.7, energy: 0.7 },
+    遗憾: { valence: -0.5, energy: 0.3, category: 'nostalgia' },
+    疲惫: { valence: -0.6, energy: 0.2 },
+    心累: { valence: -0.7, energy: 0.2 },
+    想家: { valence: -0.2, energy: 0.4, category: 'nostalgia' },
+    孤独: { valence: -0.6, energy: 0.2 },
+    自在: { valence: 0.8, energy: 0.5, category: 'zen' },
+    惬意: { valence: 0.8, energy: 0.3, category: 'zen' },
+    纠结: { valence: -0.3, energy: 0.6 },
+    烦躁: { valence: -0.5, energy: 0.8, category: 'anxiety' },
+    委屈: { valence: -0.7, energy: 0.5 },
+    感动: { valence: 0.8, energy: 0.6 },
+    珍贵: { valence: 0.9, energy: 0.5 },
+
+    // Nature / Ambience
+    rain: { valence: -0.1, energy: 0.3 },
+    sun: { valence: 0.8, energy: 0.8 },
+    cloud: { valence: 0.5, energy: 0.2 },
+    wind: { valence: 0.1, energy: 0.5 },
+    flower: { valence: 0.8, energy: 0.4 },
+    forest: { valence: 0.6, energy: 0.3, category: 'zen' },
+    ocean: { valence: 0.5, energy: 0.6 },
+    star: { valence: 0.7, energy: 0.2 },
+    moon: { valence: 0.5, energy: 0.1, category: 'nostalgia' },
+    雨: { valence: -0.2, energy: 0.3 },
+    雪: { valence: 0.2, energy: 0.2, category: 'zen' },
+    风: { valence: 0.1, energy: 0.5 },
+    花: { valence: 0.8, energy: 0.4 },
+    树: { valence: 0.6, energy: 0.3 },
+    海: { valence: 0.5, energy: 0.6 },
+    山: { valence: 0.6, energy: 0.5, category: 'zen' },
+    星: { valence: 0.8, energy: 0.2 },
+    月: { valence: 0.5, energy: 0.2, category: 'nostalgia' },
+    夜: { valence: 0.1, energy: 0.1 },
+    晨: { valence: 0.7, energy: 0.7 },
 };
 
 // ... analyzeSentiment (Unchanged) ...
@@ -165,7 +215,11 @@ export function getDiagnosis(score: SentimentScore): string {
             "旧日时光的温存，在心头泛起层层涟漪。",
             "一种淡淡的怀旧感，温暖而又略带感伤。",
             "时光倒流，记忆中的画面渐渐清晰起来。",
-            "那些回不去的岁月，如今都化作了温柔的注脚。"
+            "那些回不去的岁月，如今都化作了温柔的注脚。",
+            "岁月忽已晚，山河已秋，唯有记忆长存。",
+            "故乡的云，旧日的歌，都在此刻涌上心头。",
+            "那一抹旧时光的余晖，温暖了整个当下。",
+            "时间带走了容颜，却留下了最珍贵的怀念。"
         ]);
     }
     if (specialCategory === 'anxiety') {
@@ -174,7 +228,11 @@ export function getDiagnosis(score: SentimentScore): string {
             "哪怕风雨欲来，也请记得深呼吸，给自己一点空间。",
             "焦虑如乱麻，但请相信，一切终将理出头绪。",
             "暂且停下来吧，不必急着赶路，心安即是归处。",
-            "在这纷扰的世界里，允许自己暂时的脆弱与停歇。"
+            "在这纷扰的世界里，允许自己暂时的脆弱与停歇。",
+            "不要被未知的恐惧裹挟，相信您有足够的力量。",
+            "慢慢来，比较快。无需时刻紧绷。",
+            "每一次深呼吸，都是对当下的一次温柔拥抱。",
+            "即使是乌云密布，云层之上依然有阳光。"
         ]);
     }
     if (specialCategory === 'zen') {
@@ -183,7 +241,11 @@ export function getDiagnosis(score: SentimentScore): string {
             "一期一会，这杯茶的香气，正是当下的味道。",
             "放空心灵，与天地精神独往来。",
             "无欲无求，自在圆满。",
-            "见山是山，见水是水，回归本真的宁静。"
+            "见山是山，见水是水，回归本真的宁静。",
+            "本来无一物，何处惹尘埃。",
+            "风来疏竹，风过而竹不留声。",
+            "在这片刻的宁静中，听见花开的声音。",
+            "心无挂碍，便是人间好时节。"
         ]);
     }
     if (specialCategory === 'celebration') {
@@ -192,7 +254,11 @@ export function getDiagnosis(score: SentimentScore): string {
             "满心欢喜，忍不住要与世界分享这份快乐。",
             "举杯共饮，为了这难得的相聚与胜利。",
             "快乐如烟花般绽放，照亮了整个夜空。",
-            "这一刻的荣耀与喜悦，值得被永远铭记。"
+            "这一刻的荣耀与喜悦，值得被永远铭记。",
+            "人生得意须尽欢，莫使金樽空对月。",
+            "所有的努力，都在此刻化作了璀璨的烟火。",
+            "这不仅是胜利，更是对自我的最佳奖赏。",
+            "让欢笑声传得再远一些，今夜无人入眠。"
         ]);
     }
 
@@ -215,7 +281,11 @@ export function getDiagnosis(score: SentimentScore): string {
             "心底最柔软的地方被触动，满是温情。",
             "如沐春风般的惬意，充满着爱与被爱的感动。",
             "这是一种被爱包裹的安全感，甜蜜而踏实。",
-            "世界因为这份爱意，变得分外温柔。"
+            "世界因为这份爱意，变得分外温柔。",
+            "愿您被这世界温柔以待，眼中常含笑意。",
+            "爱是疲惫生活中的英雄梦想，您已拥有。",
+            "心中有爱，行路不难，温暖常伴左右。",
+            "这份柔软的情愫，是抵御寒冬最好的衣裳。"
         ]);
     }
 
@@ -226,7 +296,11 @@ export function getDiagnosis(score: SentimentScore): string {
             "意气风发，仿佛整个世界都在为您让路。",
             "满怀希冀与热情，正准备拥抱广阔的天地。",
             "这是一股不竭的动力，推动着您不断超越自我。",
-            "热血沸腾，正是大展宏图的好时机。"
+            "热血沸腾，正是大展宏图的好时机。",
+            "长风破浪会有时，直挂云帆济沧海。",
+            "这股蓬勃的生命力，将带领您去往更高的地方。",
+            "星光不问赶路人，时光不负有心人。",
+            "既然选择了远方，便只顾风雨兼程。"
         ]);
         if (valence < -0.4) return pick([
             "察觉到一种激烈的动荡，似乎有场风暴正在您心中积聚。",
@@ -250,7 +324,11 @@ export function getDiagnosis(score: SentimentScore): string {
             "偷得浮生半日闲，内心正处于一种松弛的状态。",
             "淡然处之，看庭前花开花落，云卷云舒。",
             "此刻的宁静，比任何喧嚣都更有力量。",
-            "像午后的猫一样慵懒，享受这份无所事事。"
+            "像午后的猫一样慵懒，享受这份无所事事。",
+            "偷得浮生半日闲，也是一种难得的智慧。",
+            "什么都不做，本身就是一种奢侈的休息。",
+            "让时间慢下来，听一听风经过的声音。",
+            "在这喧嚣的尘世中，守住内心的这一方净土。"
         ]);
         if (valence < -0.3) return pick([
             "感受到一丝疲惫与低落，仿佛独自走在无人的雨巷。",
@@ -259,7 +337,11 @@ export function getDiagnosis(score: SentimentScore): string {
             "这一刻的孤独，也许是与自己对话的最好时机。",
             "悲伤如潮水般退去后，留下的只有沙滩上的印记。",
             "心如死灰，也许正是重生的开始。", // Added for "寒心" context
-            "这种寒意，让人无比清醒。" // Added for "寒心" context
+            "这种寒意，让人无比清醒。",
+            "允许自己悲伤，因为那也是生命的一部分。",
+            "哭出来也没关系，雨过天晴后会有彩虹。",
+            "虽然现在很痛，但时间的流水终将冲淡一切。",
+            "每一个长夜终将过去，黎明总会准时到来。"
         ]);
         return pick([
             "您的气息平稳而深沉，正处于一种内省的状态。",
@@ -300,7 +382,11 @@ export function getDiagnosis(score: SentimentScore): string {
             "与其说是平淡，不如说是一种难得的留白。",
             "或许这就是所谓的“放空”，让思绪自由飘荡。",
             "像是在看一场不关己的电影，内心充满了旁观者的清醒。",
-            "不以物喜，不以己悲，保持着一份超然。"
+            "不以物喜，不以己悲，保持着一份超然。",
+            "闲看庭前花开花落，漫随天外云卷云舒。",
+            "在这平凡的一天里，藏着生活的真意。",
+            "无惊无险，又是一年好风景。",
+            "心宽一寸，路宽一丈，自在随心。"
         ]);
     }
 }
