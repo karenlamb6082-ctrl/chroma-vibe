@@ -156,17 +156,17 @@ export function getColorsBySentiment(valence: number, energy: number, specialCat
 
     // Standard Logic
     if (energy > 0.7) {
-        if (valence > 0.4) targetFamily = ['red', 'yellow', 'gold'];
-        else targetFamily = ['red', 'black', 'purple'];
+        if (valence > 0.4) targetFamily = ['red', 'yellow', 'gold', 'white']; // Added white
+        else targetFamily = ['red', 'black', 'purple', 'cyan']; // Added cyan
     } else if (energy < 0.4) {
         if (valence > 0.4) targetFamily = ['green', 'white', 'cyan', 'brown'];
         // Removed 'blue' from default low-energy to avoid over-exposure of QunQing. Added 'cyan' 'brown'.
-        else targetFamily = ['purple', 'black', 'white', 'blue'];
+        else targetFamily = ['purple', 'black', 'white', 'blue', 'green']; // Added green
     } else {
         // Mid energy
         // Removed 'gold' to keep it special. Removed 'blue' to force more greens/browns in neutral.
-        if (valence > 0.2) targetFamily = ['yellow', 'cyan', 'purple'];
-        else targetFamily = ['green', 'brown', 'cyan']; // Was blue/green/brown
+        if (valence > 0.2) targetFamily = ['yellow', 'cyan', 'purple', 'red']; // Added red
+        else targetFamily = ['green', 'brown', 'cyan', 'white']; // Added white
     }
 
     const balancedResult: ChineseColor[] = [];
@@ -208,12 +208,13 @@ export function getColorsBySentiment(valence: number, energy: number, specialCat
     // Safety fallback
     const shuffled = balancedResult.length === 4 ? balancedResult : CHINESE_COLORS.filter(c => targetFamily.includes(c.family)).sort(() => 0.5 - Math.random());
 
-    // Wildcard Feature: 20% Chance to replace the 4th color with a completely random one from ANY family
+    // Wildcard Feature: 40% Chance to replace the 3rd or 4th color with a completely random one
     // This adds "Self-Utilization" variety as requested
     let result = shuffled.slice(0, 4);
-    if (Math.random() > 0.8 && result.length === 4) {
+    if (Math.random() > 0.6 && result.length === 4) { // Increased chance from 20% to 40%
         const randomColor = CHINESE_COLORS[Math.floor(Math.random() * CHINESE_COLORS.length)];
-        result[3] = randomColor; // Spice it up
+        const replaceIdx = Math.random() > 0.5 ? 3 : 2; // Replace 3rd or 4th color
+        result[replaceIdx] = randomColor;
     }
 
     return result;

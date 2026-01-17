@@ -52,9 +52,13 @@ export default function BackgroundMusic() {
     useEffect(() => {
         const handleInteraction = () => {
             if (!hasInteracted && !isPlaying && audioRef.current) {
-                // We don't auto-play on first click to avoid annoying user, 
-                // but we mark interaction so next intent works freely
-                // setHasInteracted(true); 
+                // User wants music by default, so we play on first interaction if autoplay failed
+                audioRef.current.play()
+                    .then(() => {
+                        setIsPlaying(true);
+                        setHasInteracted(true);
+                    })
+                    .catch(e => console.log("Still blocked:", e));
             }
         };
 
@@ -68,7 +72,7 @@ export default function BackgroundMusic() {
                 ref={audioRef}
                 src="/bgm.mp3"
                 loop
-                preload="auto"
+                autoPlay
             />
 
             <button
