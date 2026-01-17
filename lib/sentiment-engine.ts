@@ -2,6 +2,7 @@
 export interface SentimentScore {
     valence: number;
     energy: number;
+    chaos?: number; // 0-1
     isConflict?: boolean;
     specialCategory?: 'nostalgia' | 'anxiety' | 'celebration' | 'zen';
 }
@@ -160,19 +161,24 @@ const WORD_SCORES: Record<string, SentimentScore & { category?: string }> = {
 };
 
 // ... analyzeSentiment (Unchanged) ...
+// ... (WORD_SCORES remains the same, verified good) ...
+
 export function analyzeSentiment(text: string): SentimentScore {
     let totalValence = 0;
-    let totalEnergy = 0; // Fixed: Start at 0 for accurate average
+    let totalEnergy = 0;
     let count = 0;
     let hasPos = false;
     let hasNeg = false;
-    let isChoice = false;
+    let chaosScore = 0;
+
+    // Chaos Detection Triggers
+    const isChoice = text.includes("还是") || text.includes("选择") || text.includes("or") || text.includes("?");
+    const isQuestion = text.includes("?") || text.includes("？") || text.includes("吗");
+    const isLong = text.length > 20;
+
     const categoryCounts: Record<string, number> = { nostalgia: 0, anxiety: 0, celebration: 0, zen: 0 };
     const lowerText = text.toLowerCase();
 
-    if (text.includes("还是") || text.includes("选择") || text.includes("or") || text.includes("?")) {
-        isChoice = true;
-    }
     Object.keys(WORD_SCORES).forEach(key => {
         const isChinese = /[\u4e00-\u9fa5]/.test(key);
         const matched = isChinese ? text.includes(key) : lowerText.includes(key);
@@ -181,27 +187,45 @@ export function analyzeSentiment(text: string): SentimentScore {
             totalValence += s.valence;
             totalEnergy += s.energy;
             count++;
+
             if (s.valence > 0.4) hasPos = true;
             if (s.valence < -0.4) hasNeg = true;
-            if (s.category) categoryCounts[s.category] = (categoryCounts[s.category] || 0) + 1;
+            if (s.category) {
+                categoryCounts[s.category] = (categoryCounts[s.category] || 0) + 1;
+                // Certain categories imply complexity
+                if (s.category === 'anxiety' || s.category === 'nostalgia') chaosScore += 0.2;
+            }
         }
     });
-    if (count === 0) return { valence: 0, energy: 0.5 }; // Default if no words found
-    if (text.includes("阳光") || text.includes("Sun")) totalEnergy = Math.max(totalEnergy, 0.6 * count);
 
-    let dominantCategory: 'nostalgia' | 'anxiety' | 'celebration' | 'zen' | undefined;
-    let maxCatCount = 0;
-    Object.entries(categoryCounts).forEach(([cat, c]) => {
-        if (c > maxCatCount) {
-            maxCatCount = c;
-            dominantCategory = cat as any;
-        }
-    });
+    // Default normalization
+    let finalValence = count > 0 ? (totalValence / count) : 0;
+    let finalEnergy = count > 0 ? (totalEnergy / count) : 0.5;
+
+    // --- Chaos Calculation Logic ---
+    // 1. Conflict (Pos + Neg words)
+    if (hasPos && hasNeg) chaosScore += 0.4;
+    // 2. Questions/Choices
+    if (isChoice || isQuestion) chaosScore += 0.3;
+    // 3. Length (Rambling often implies complex thoughts)
+    if (isLong) chaosScore += 0.1;
+    // 4. Low count but long text (Ambiguity)
+    if (count < 1 && isLong) chaosScore += 0.3;
+
+    // Cap Chaos
+    chaosScore = Math.min(1, Math.max(0, chaosScore));
+
+    // Special Keywords Overrides (e.g., "Confusion")
+    if (text.includes("纠结") || text.includes("复杂") || text.includes("乱")) chaosScore = Math.max(0.8, chaosScore);
+    if (text.includes("简单") || text.includes("纯粹") || text.includes("静")) chaosScore = Math.min(0.2, chaosScore);
+
     return {
-        valence: Math.max(-1, Math.min(1, totalValence / count)),
-        energy: Math.max(0, Math.min(1, totalEnergy / Math.max(1, count))),
-        isConflict: ((hasPos && hasNeg) || isChoice) && !dominantCategory,
-        specialCategory: dominantCategory
+        valence: Math.max(-1, Math.min(1, finalValence)),
+        energy: Math.max(0, Math.min(1, finalEnergy)),
+        isConflict: ((hasPos && hasNeg) || isChoice),
+        // Special category logic generally preserved via chaos/energy maps now, 
+        // but we keep the dominant one for Diagnosis text generation
+        specialCategory: Object.keys(categoryCounts).reduce((a, b) => categoryCounts[a] > categoryCounts[b] ? a : b, 'zen') as any // Simplified max
     };
 }
 

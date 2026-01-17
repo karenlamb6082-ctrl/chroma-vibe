@@ -20,6 +20,16 @@ interface VibeState {
     diagnosis?: string;
 }
 
+// Helper: Calculate luminance to determine text color
+function getLuminance(hex: string): number {
+    const c = hex.substring(1);      // strip #
+    const rgb = parseInt(c, 16);   // convert rrggbb to decimal
+    const r = (rgb >> 16) & 0xff;  // extract red
+    const g = (rgb >> 8) & 0xff;  // extract green
+    const b = (rgb >> 0) & 0xff;  // extract blue
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
 export default function RootPage() {
     const [vibe, setVibe] = useState<VibeState>({
         colors: ["#77969a", "#a4e2c6", "#2775b6", "#d6ecf0"],
@@ -58,10 +68,13 @@ export default function RootPage() {
         setIsTransitioning(true);
 
         try {
+            // Collect last 3 palettes from history for de-duplication context
+            const recentHexCodes = history.slice(0, 3).flatMap(item => item.colors);
+
             const response = await fetch("/api/analyze-vibe", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ text }),
+                body: JSON.stringify({ text, recentHexCodes }),
             });
 
             if (response.ok) {
@@ -130,12 +143,17 @@ export default function RootPage() {
 
             <div className="flex flex-col items-center justify-center min-h-full py-20 px-4 md:px-6 gap-12 w-full">
 
-                {/* Branding Hero Section (Visible only when no vibe generated yet) */}
+                {/* Branding Hero Section */}
                 <div className={cn(
                     "flex flex-col items-center justify-center transition-all duration-1000 absolute top-[20%] md:top-[25%] left-0 right-0 z-10 pointer-events-none",
-                    vibe.paletteName ? "opacity-0 translate-y-[-50px] scale-90" : "opacity-100 translate-y-0 scale-100"
+                    vibe.paletteName ? "opacity-0 translate-y-[-50px] scale-90" : "opacity-100 translate-y-0 scale-100",
+                    // Dynamic Text Color for Title
+                    vibe.paletteName && getLuminance(vibe.colors[0]) > 100 ? "text-slate-900/90" : "text-white/90"
                 )}>
-                    <h1 className="text-[6rem] md:text-[8rem] text-white/90 font-calligraphy leading-tight select-none drop-shadow-2xl"
+                    <h1 className={cn(
+                        "text-[6rem] md:text-[8rem] font-calligraphy leading-tight select-none drop-shadow-2xl transition-colors duration-1000",
+                        vibe.paletteName && getLuminance(vibe.colors[0]) > 100 ? "text-slate-800" : "text-white/90"
+                    )}
                         style={{ fontFamily: 'var(--font-ma-shan-zheng)' }}>
                         映心
                     </h1>
@@ -162,11 +180,17 @@ export default function RootPage() {
                     "w-full max-w-6xl transition-all duration-1000 ease-in-out flex flex-col items-center justify-center",
                     isTransitioning ? "opacity-0 blur-sm translate-y-4" : "opacity-100 blur-0 translate-y-0"
                 )}>
-                    <MoodDisplay
-                        paletteName={vibe.paletteName}
-                        moodDescription={vibe.moodDescription}
-                        diagnosis={vibe.diagnosis}
-                    />
+                    {/* Dynamic Text Color Wrapper */}
+                    <div className={cn(
+                        "transition-colors duration-1000",
+                        vibe.paletteName && getLuminance(vibe.colors[0]) > 140 ? "text-slate-800" : "text-white"
+                    )}>
+                        <MoodDisplay
+                            paletteName={vibe.paletteName}
+                            moodDescription={vibe.moodDescription}
+                            diagnosis={vibe.diagnosis}
+                        />
+                    </div>
 
                     {/* Back to Home Button - High Visibility Version */}
                     {vibe.paletteName && (
