@@ -6,6 +6,8 @@ export const metadata: Metadata = {
   description: "What color is your mood?",
 };
 
+import BackgroundMusic from "@/components/BackgroundMusic";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -14,6 +16,7 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <body className={`antialiased bg-black text-white font-serif`}>
+        <BackgroundMusic />
         {children}
       </body>
     </html>
